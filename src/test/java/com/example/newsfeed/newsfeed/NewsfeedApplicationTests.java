@@ -1,10 +1,10 @@
-package com.investory.newsfeed;
+package com.example.newsfeed.newsfeed;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class NewsfeedSystemApplicationTests {
+class NewsfeedApplicationTests {
 
     @Test
     void contextLoads() {
