@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>뉴스 피드</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #191f28;
+            color: #e8eaed;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: #212630;
+            border-bottom: 1px solid #2c3340;
+            padding: 16px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 680px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: #3182f6;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #3182f6;
+        }
+
+        .username {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .container {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .compose-box {
+            background: #212630;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .compose-textarea {
+            width: 100%;
+            background: #191f28;
+            border: 1px solid #2c3340;
+            border-radius: 12px;
+            padding: 16px;
+            color: #e8eaed;
+            font-size: 15px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .compose-textarea:focus {
+            outline: none;
+            border-color: #3182f6;
+        }
+
+        .compose-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 12px;
+        }
+
+        .btn {
+            background: #3182f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: #2870e8;
+            transform: translateY(-1px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            background: #2c3340;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .post {
+            background: #212630;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .post-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #3182f6;
+        }
+
+        .post-author {
+            flex: 1;
+        }
+
+        .post-name {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 2px;
+        }
+
+        .post-username {
+            color: #9aa5b1;
+            font-size: 14px;
+        }
+
+        .post-time {
+            color: #9aa5b1;
+            font-size: 13px;
+        }
+
+        .post-content {
+            font-size: 15px;
+            line-height: 1.5;
+            margin-bottom: 16px;
+            white-space: pre-wrap;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 20px;
+            padding-top: 12px;
+            border-top: 1px solid #2c3340;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: none;
+            border: none;
+            color: #9aa5b1;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            background: #2c3340;
+            color: #e8eaed;
+        }
+
+        .action-btn.liked {
+            color: #ff6b6b;
+        }
+
+        .sidebar {
+            background: #212630;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .user-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            transition: background 0.2s;
+        }
+
+        .user-item:hover {
+            background: #2c3340;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+
+        .user-details {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .user-bio {
+            color: #9aa5b1;
+            font-size: 13px;
+            margin-top: 2px;
+        }
+
+        .follow-btn {
+            background: #3182f6;
+            color: white;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .follow-btn:hover {
+            background: #2870e8;
+        }
+
+        .follow-btn.following {
+            background: #2c3340;
+            color: #9aa5b1;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .page-btn {
+            background: #212630;
+            color: #e8eaed;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .page-btn:hover {
+            background: #2c3340;
+        }
+
+        .page-btn.active {
+            background: #3182f6;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #9aa5b1;
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 12px;
+            }
+
+            .post, .compose-box, .sidebar {
+                border-radius: 12px;
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="header-content">
+        <div class="logo">📰 뉴스 피드</div>
+        <div class="user-info">
+            <img th:src="${currentUser.profileImage}" alt="avatar" class="avatar">
+            <span class="username" th:text="${currentUser.name}">User</span>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- 포스트 작성 -->
+    <div class="compose-box">
+            <textarea
+                    id="postContent"
+                    class="compose-textarea"
+                    placeholder="무슨 생각을 하고 계신가요?"
+            ></textarea>
+        <div class="compose-actions">
+            <button class="btn" onclick="createPost()">게시하기</button>
+        </div>
+    </div>
+
+    <!-- 추천 사용자 -->
+    <div class="sidebar">
+        <h3 class="sidebar-title">추천 사용자</h3>
+        <div th:each="user : ${allUsers}">
+            <div class="user-item" th:if="${user.id != currentUser.id}">
+                <img th:src="${user.profileImage}" alt="avatar" class="user-avatar">
+                <div class="user-details">
+                    <div class="user-name" th:text="${user.name}">Name</div>
+                    <div class="user-bio" th:text="${user.bio}">Bio</div>
+                </div>
+                <button
+                        class="follow-btn"
+                        th:classappend="${currentUser.following.contains(user)} ? 'following' : ''"
+                        th:text="${currentUser.following.contains(user)} ? '팔로잉' : '팔로우'"
+                        th:attr="data-user-id=${user.id}"
+                        th:onclick="'toggleFollow(' + ${user.id} + ', this)'"
+                >팔로우</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 뉴스 피드 -->
+    <div th:if="${posts.content.size() > 0}">
+        <div class="post" th:each="post : ${posts.content}">
+            <div class="post-header">
+                <img th:src="${post.user.profileImage}" alt="avatar" class="post-avatar">
+                <div class="post-author">
+                    <div class="post-name" th:text="${post.user.name}">Name</div>
+                    <div class="post-username" th:text="'@' + ${post.user.username}">@username</div>
+                </div>
+                <div class="post-time" th:text="${#temporals.format(post.createdAt, 'MM/dd HH:mm')}">time</div>
+            </div>
+            <div class="post-content" th:text="${post.content}">Content</div>
+            <div class="post-actions">
+                <button
+                        class="action-btn"
+                        th:attr="data-post-id=${post.id}"
+                        onclick="likePost(this)"
+                >
+                    ❤️ <span th:text="${post.likeCount}">0</span>
+                </button>
+                <button class="action-btn">
+                    💬 <span th:text="${post.commentCount}">0</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 페이지네이션 -->
+        <div class="pagination" th:if="${posts.totalPages > 1}">
+            <button
+                    class="page-btn"
+                    th:if="${currentPage > 0}"
+                    th:onclick="'location.href=\'/feed/' + ${currentUser.id} + '?page=' + ${currentPage - 1} + '\''"
+            >이전</button>
+            <button
+                    class="page-btn active"
+                    th:text="${currentPage + 1} + ' / ' + ${posts.totalPages}"
+            >1 / 1</button>
+            <button
+                    class="page-btn"
+                    th:if="${currentPage < posts.totalPages - 1}"
+                    th:onclick="'location.href=\'/feed/' + ${currentUser.id} + '?page=' + ${currentPage + 1} + '\''"
+            >다음</button>
+        </div>
+    </div>
+
+    <div class="empty-state" th:if="${posts.content.size() == 0}">
+        <div class="empty-icon">📭</div>
+        <p>아직 게시물이 없습니다.</p>
+        <p>사람들을 팔로우하거나 첫 게시물을 작성해보세요!</p>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    const currentUserId = /*[[${currentUser.id}]]*/ 1;
+
+    function createPost() {
+        const content = document.getElementById('postContent').value.trim();
+        if (!content) {
+            alert('내용을 입력해주세요.');
+            return;
+        }
+
+        fetch('/post', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: `userId=${currentUserId}&content=${encodeURIComponent(content)}`
+        })
+            .then(response => response.text())
+            .then(() => {
+                location.reload();
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function toggleFollow(userId, button) {
+        const isFollowing = button.classList.contains('following');
+        const action = isFollowing ? '/unfollow' : '/follow';
+
+        fetch(action, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: `followerId=${currentUserId}&followingId=${userId}`
+        })
+            .then(response => response.text())
+            .then(() => {
+                location.reload();
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function likePost(button) {
+        const postId = button.getAttribute('data-post-id');
+        const countSpan = button.querySelector('span');
+
+        fetch('/like', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: `postId=${postId}`
+        })
+            .then(response => response.text())
+            .then(() => {
+                const currentCount = parseInt(countSpan.textContent);
+                countSpan.textContent = currentCount + 1;
+                button.classList.add('liked');
+            })
+            .catch(error => console.error('Error:', error));
+    }
+</script>
+</body>
+</html>
